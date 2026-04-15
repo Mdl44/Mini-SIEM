@@ -1,0 +1,6 @@
+1, Main_Database, 10.0.0.5, Linux, CRITICAL
+2, Web_Server_01, 10.0.0.10, Linux, HIGH
+3, CEO_Laptop, 10.0.0.50, Windows, HIGH
+4, HR_Shared_Drive, 10.0.0.20, Windows, MEDIUM
+5, Guest_Wi-Fi_Router, 192.168.1.1, Linux, LOW
+6,Router,10.0.0.1,Cisco IOS,CRITICAL

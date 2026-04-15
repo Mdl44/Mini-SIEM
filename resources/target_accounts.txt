@@ -1,0 +1,8 @@
+root
+admin
+administrator
+sysadmin
+db_admin
+backup_user
+superuser
+network_admin

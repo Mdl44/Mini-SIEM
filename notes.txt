@@ -1,0 +1,73 @@
+Models
+1. User(id, name, email) - clasa abstracta pentru tipurile de utilizatori din aplicatie (Analyst si Admin)
+        - printDashboard() - metoda abstracta
+   - SOCAnalyst(password, rank, daysSurvived, maxLives, currentLives, maxSeniorCalls, currentSeniorCalls)
+        - recordSuccessfulDay() - contor de zile supravietuite pentru rank up
+        - recordFlawlessDay() - pentru zile perfecte, primesti o viata inapoi (in cazul in care ai pierdut din vieti)
+        - printDashboard()
+   - Admin(id, name, email)
+        - printDashboard()
+
+2. MonitoredSystem(id, name, ipAddress, osType, importance) - echipamentele care "genereaza" traficul
+
+3. SecurityEvent(id, timestamp, sourceSystem, severity) - clasa abstracta pentru tipurile mari de evenimente (LoginEvent si NetworkEvent)
+        - getEventType() - metoda abstracta
+    - LoginEvent(id, timestamp, sourceSystem, severity, username, status, sourceIP) - event de logare, poate avea status SUCCESS sau FAILED
+    - NetworkEvent(id, timestamp, sourceSystem, severity, destinationIP, port, protocol) - event de retea, are o adresa ip, un port si un protocol (TCP/UDP)
+
+4. InvestigationReport(id, incidentId, analystId, playerDecision, wasMalicious) - raport pentru incidente
+        - calculateGrading() - verifica decizia jucatorului in comparatie cu realitatea
+
+5. Incident(id, sourceIp, events, isMalicious, severity) - incidentele cu care analistul se confrunta. implementeaza comparable pentru ca incidentele sunt
+sortate la inceput in functie de severity.
+        - compareTo() - suprascrierea metodei compareTo pentru a folosi severitatea pentru comparatie. la severitate egala se iau in ordinea generarii
+
+Repositories
+6. AnalystRepository - interfata pentru datele analistilor
+        - findall() - creeaza si returneaza o lista cu datele tuturor analistilor
+        - findByUsername() - folosit clasa generica Optional pentru NullPointerException (in cazul in care username ul nu e in baza de date)
+        - save() - salveaza analistul in lista analistilor si in fisierul txt
+        - updateAll() - salveaza noile date ale analistilor in fisier
+
+7. BlacklistRepository - interfata pentru ip-urile din lista neagra (ip-uri cunoscute ca fiind legate de atacatori)
+        - isBlacklisted() - verifica daca ip-ul este in lista neagra
+        - getAll() - returneaza toate ip-urile din lista neagra
+        - add() - adauga in lista neagra de ip-uri
+
+8. SystemRepository - interfata pentru echipamentele care genereaza traficul
+        - findAll() - citeste si returneaza o lista de echipamente
+        - add() - adauga un nou echipament
+
+9. TrafficDataRepository - interfata pentru trafic
+        - getFirstNames() - returneaza lista cu numele angajatilor
+        - getDepartments() - returneaza lista cu numele departamentelor
+        - getAttackerIPs() - returneaza lista cu ip-urile atacatorilor
+        - getTargetAccounts() - returneaza lista conturilor
+        - getInternalIPs() - returneaza lista ip-urilor interne
+
+Services
+10. SIEMService(systemRepository, blacklistRepository) - tine repositories-urile folosite in timpul jocului (blacklist si lista de echipamente) si incarca lista de incidente pentru acea zi
+        - loadDailyQueue() - incarca lista de incidente
+        - claimNextIncident() - preia urmatorul incident
+        - printBlacklist() - printeaza lista de ip-uri din lista neagra
+        - printMonitoredSystems() - printeaza lista de echipamente
+        - addBlacklistIp() - adauga ip-ul din incidentul curent in lista neagra
+        - addMonitoredSystem() - adauga un nou echipament
+
+11. TrafficSimulator(dataRepository) - genereaza traficul pe baza datelor din TrafficDataRepository
+        - generateDailyQueue() - genereaza random trafic in functie de rank-ul jucatorului
+        - createEmployeeSession() - genereaza trafic normal (intre 0-3 failed, 1 succes)
+        - createBruteForceSession() - genereaza brute force (failed login-uri intre 0-7 catre conturi tinta)
+        - createPortScanSession() - genereaza port scan-uri la 3 port-uri dintr o lista predefinita
+        - createCompromisedAccountSession() - genereaza login success, dar facut de un atacator
+        - createInsiderThreatSession() - conectare prin ssh
+        - createDDoSSession() - 10 cereri pe port-ul 80
+        - createRemoteWorkerSession() - login de la un cont remote de exec
+
+Views
+12. GameMenu(analystRepo, systemRepo, blacklistRepo, trafficRepo)
+        - start() - meniul de start, autentificare ca analist sau ca admin
+        - analystLoop() - genereaza dosarele cu incidente (10 pe zi)
+        - investigateCase() - meniul de investigatie, poti vedea sistemele, lista neagra de ip-uri, sa ceri ajutor, sa permiti sau sa blochezi traficul
+        - evaluateShift() - la finalul zilei, verifica cate dosare au fost manageriate corect
+        - adminLoop() - crearea/vizualizarea echipamentelor, a conturilor.
