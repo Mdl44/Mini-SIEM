@@ -1,10 +1,6 @@
 package services;
 
-import models.Incident;
-import models.LoginEvent;
-import models.MonitoredSystem;
-import models.NetworkEvent;
-import models.SecurityEvent;
+import models.*;
 import repositories.TrafficDataRepository;
 
 import java.time.LocalDateTime;
@@ -74,12 +70,12 @@ public class TrafficSimulator {
         LocalDateTime baseTime = LocalDateTime.now().minusMinutes(random.nextInt(120));
 
         for (int i = 0; i < failedAttempts; i++) {
-            events.add(new LoginEvent(eventIdCounter++, baseTime.plusSeconds(i * 10L), system, "LOW", username, "FAILED", ip));
+            events.add(new LoginEvent(eventIdCounter++, baseTime.plusSeconds(i * 10L), system, Severity.LOW, username, "FAILED", ip));
         }
 
-        events.add(new LoginEvent(eventIdCounter++, baseTime.plusSeconds(failedAttempts * 10L + 5), system, "LOW", username, "SUCCESS", ip));
+        events.add(new LoginEvent(eventIdCounter++, baseTime.plusSeconds(failedAttempts * 10L + 5), system, Severity.LOW, username, "SUCCESS", ip));
 
-        return new Incident(incidentIdCounter++, ip, events, false, isClumsy ? "MEDIUM" : "LOW");
+        return new Incident(incidentIdCounter++, ip, events, false, isClumsy ? Severity.MEDIUM : Severity.LOW);
     }
 
     private Incident createBruteForceSession(MonitoredSystem system) { //incercari nereusite de a se conecta la conturi cu importanta mare
@@ -91,10 +87,10 @@ public class TrafficSimulator {
         LocalDateTime baseTime = LocalDateTime.now().minusMinutes(random.nextInt(120));
 
         for (int i = 0; i < attempts; i++) {
-            events.add(new LoginEvent(eventIdCounter++, baseTime.plusSeconds(i * 2L), system, "HIGH", targetAccount, "FAILED", ip));
+            events.add(new LoginEvent(eventIdCounter++, baseTime.plusSeconds(i * 2L), system, Severity.HIGH, targetAccount, "FAILED", ip));
         }
 
-        return new Incident(incidentIdCounter++, ip, events, true, "HIGH");
+        return new Incident(incidentIdCounter++, ip, events, true, Severity.HIGH);
     }
 
     private Incident createPortScanSession(MonitoredSystem system) { //port scan
@@ -114,10 +110,10 @@ public class TrafficSimulator {
         }
 
         for (int i = 0; i < selectedPorts.size(); i++) {
-            events.add(new NetworkEvent(eventIdCounter++, baseTime.plusSeconds(i), system, "CRITICAL", ip, selectedPorts.get(i), "TCP"));
+            events.add(new NetworkEvent(eventIdCounter++, baseTime.plusSeconds(i), system, Severity.CRITICAL, ip, selectedPorts.get(i), "TCP"));
         }
 
-        return new Incident(incidentIdCounter++, ip, events, true, "CRITICAL");
+        return new Incident(incidentIdCounter++, ip, events, true, Severity.CRITICAL);
     }
 
     private Incident createCompromisedAccountSession(MonitoredSystem system) { //login pe un ip de atacator
@@ -125,18 +121,18 @@ public class TrafficSimulator {
         String validUsername = getRandomEmployee();
         List<SecurityEvent> events = new ArrayList<>();
 
-        events.add(new LoginEvent(eventIdCounter++, LocalDateTime.now().minusMinutes(random.nextInt(120)), system, "LOW", validUsername, "SUCCESS", ip));
+        events.add(new LoginEvent(eventIdCounter++, LocalDateTime.now().minusMinutes(random.nextInt(120)), system, Severity.LOW, validUsername, "SUCCESS", ip));
 
-        return new Incident(incidentIdCounter++, ip, events, true, "LOW");
+        return new Incident(incidentIdCounter++, ip, events, true, Severity.LOW);
     }
 
     private Incident createInsiderThreatSession(MonitoredSystem system) { //conectare prin ssh
         String ip = internalIPs.get(random.nextInt(internalIPs.size()));
         List<SecurityEvent> events = new ArrayList<>();
 
-        events.add(new NetworkEvent(eventIdCounter++, LocalDateTime.now().minusMinutes(random.nextInt(120)), system, "HIGH", ip, 22, "TCP"));
+        events.add(new NetworkEvent(eventIdCounter++, LocalDateTime.now().minusMinutes(random.nextInt(120)), system, Severity.HIGH, ip, 22, "TCP"));
 
-        return new Incident(incidentIdCounter++, ip, events, true, "HIGH");
+        return new Incident(incidentIdCounter++, ip, events, true, Severity.HIGH);
     }
 
     private Incident createDDoSSession(MonitoredSystem system) { //denial of service
@@ -145,10 +141,10 @@ public class TrafficSimulator {
 
         LocalDateTime baseTime = LocalDateTime.now().minusMinutes(random.nextInt(120));
         for (int i = 0; i < 10; i++) {
-            events.add(new NetworkEvent(eventIdCounter++, baseTime.plusNanos(i * 100000000), system, "CRITICAL", ip, 80, "TCP"));
+            events.add(new NetworkEvent(eventIdCounter++, baseTime.plusNanos(i * 100000000), system, Severity.CRITICAL, ip, 80, "TCP"));
         }
 
-        return new Incident(incidentIdCounter++, ip, events, true, "CRITICAL");
+        return new Incident(incidentIdCounter++, ip, events, true, Severity.CRITICAL);
     }
 
     private Incident createRemoteWorkerSession(MonitoredSystem system) {
@@ -156,9 +152,9 @@ public class TrafficSimulator {
         String executive = "exec.mgmt";
         List<SecurityEvent> events = new ArrayList<>();
 
-        events.add(new LoginEvent(eventIdCounter++, LocalDateTime.now().minusMinutes(random.nextInt(120)), system, "MEDIUM", executive, "SUCCESS", ip));
+        events.add(new LoginEvent(eventIdCounter++, LocalDateTime.now().minusMinutes(random.nextInt(120)), system, Severity.MEDIUM, executive, "SUCCESS", ip));
 
-        return new Incident(incidentIdCounter++, ip, events, false, "MEDIUM");
+        return new Incident(incidentIdCounter++, ip, events, false, Severity.MEDIUM);
     }
 
     private String getRandomEmployee() {

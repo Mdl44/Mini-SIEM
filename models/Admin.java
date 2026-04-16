@@ -1,12 +1,6 @@
 package models;
 
-import java.io.Serial;
-import java.io.Serializable;
-
-public class Admin extends User implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
-
+public class Admin extends User {
     public Admin(int id, String name, String email) {
         super(id, name, email);
     }

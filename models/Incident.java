@@ -14,10 +14,10 @@ public class Incident implements Comparable<Incident>, Serializable {
     private final List<SecurityEvent> events;
     private final boolean isMalicious;
 
-    private final String severity;
+    private final Severity severity;
     private final LocalDateTime generationDate;
 
-    public Incident(int id, String sourceIp, List<SecurityEvent> events, boolean isMalicious, String severity) {
+    public Incident(int id, String sourceIp, List<SecurityEvent> events, boolean isMalicious, Severity severity) {
         this.id = id;
         this.sourceIp = sourceIp;
         this.events = events;
@@ -33,22 +33,21 @@ public class Incident implements Comparable<Incident>, Serializable {
 
     @Override
     public int compareTo(Incident otherIncident) {
-        int thisWeight = getSeverityWeight(this.severity);
-        int otherWeight = getSeverityWeight(otherIncident.getSeverity());
+        int thisImportance = getSeverityImportance(this.severity);
+        int otherImportance = getSeverityImportance(otherIncident.getSeverity());
 
-        if (thisWeight != otherWeight) {
-            return Integer.compare(otherWeight, thisWeight);
+        if (thisImportance != otherImportance) {
+            return Integer.compare(otherImportance, thisImportance);
         }
         return this.generationDate.compareTo(otherIncident.getGenerationDate());
     }
 
-    private int getSeverityWeight(String severityLevel) {
-        return switch (severityLevel.toUpperCase()) {
-            case "CRITICAL" -> 4;
-            case "HIGH" -> 3;
-            case "MEDIUM" -> 2;
-            case "LOW" -> 1;
-            default -> 0;
+    private int getSeverityImportance(Severity severityLevel) {
+        return switch (severityLevel) {
+            case CRITICAL -> 4;
+            case HIGH -> 3;
+            case MEDIUM -> 2;
+            case LOW -> 1;
         };
     }
 
@@ -57,7 +56,7 @@ public class Incident implements Comparable<Incident>, Serializable {
     public List<SecurityEvent> getEvents() { return events; }
     public boolean isMalicious() { return isMalicious; }
 
-    public String getSeverity() { return severity; }
+    public Severity getSeverity() { return severity; }
     public LocalDateTime getGenerationDate() { return generationDate; }
 
     @Override

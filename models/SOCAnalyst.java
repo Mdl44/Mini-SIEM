@@ -1,12 +1,6 @@
 package models;
 
-import java.io.Serial;
-import java.io.Serializable;
-
-public class SOCAnalyst extends User implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
-
+public class SOCAnalyst extends User {
     private final String password;
     private int rank; // 1 = junior, 2 = mid, 3 = senior
     private int daysSurvived;

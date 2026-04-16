@@ -32,14 +32,32 @@ public class FileAnalystRepository implements AnalystRepository {
 
     @Override
     public Optional<SOCAnalyst> findByUsername(String username) {
-        return findAll().stream().filter(a -> a.getName().equalsIgnoreCase(username)).findFirst();
+        List<SOCAnalyst> allAnalysts = findAll();
+
+        for (SOCAnalyst analyst : allAnalysts) {
+            if (analyst.getName().equalsIgnoreCase(username)) {
+                return Optional.of(analyst);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
     public void save(SOCAnalyst analyst) {
         List<SOCAnalyst> all = findAll();
-        all.removeIf(a -> a.getId() == analyst.getId());
-        all.add(analyst);
+        boolean found = false;
+
+        for (int i = 0; i < all.size(); i++) {
+            if (all.get(i).getId() == analyst.getId()) {
+                all.set(i, analyst);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            all.add(analyst);
+        }
         updateAll(all);
     }
 

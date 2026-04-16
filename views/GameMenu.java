@@ -8,10 +8,10 @@ import repositories.SystemRepository;
 import repositories.BlacklistRepository;
 import repositories.TrafficDataRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 
 public class GameMenu {
     private final Scanner scanner;
@@ -24,6 +24,17 @@ public class GameMenu {
         this.analystRepo = analystRepo;
         this.siemService = new SIEMService(systemRepo, blacklistRepo);
         this.trafficSimulator = new TrafficSimulator(trafficRepo);
+    }
+
+    private void secureArchiveShift(List<InvestigationReport> reports, String analystName) {
+        String fileName = "resources/audit_" + analystName + "_" + System.currentTimeMillis() + ".dat";
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName))) {
+            oos.writeObject(reports);
+            System.out.println("[AUDIT] Shift reports securely archived to binary storage.");
+        } catch (IOException e) {
+            System.out.println("[ERROR] Failed to archive shift reports: " + e.getMessage());
+        }
     }
 
     public void start() {
@@ -156,14 +167,33 @@ public class GameMenu {
         System.out.println("               SHIFT END REPORT                   ");
         System.out.println("==================================================");
 
+        Map<String, Integer> shiftStatistics = new HashMap<>();
+        shiftStatistics.put("Flawless Decisions", 0);
+        shiftStatistics.put("False Positive (Blocked Employee)", 0);
+        shiftStatistics.put("False Negative (Missed Hacker)", 0);
+
         int mistakes = 0;
 
         for (InvestigationReport report : reports) {
             if (!report.isCorrect()) {
                 System.out.println("Case #" + report.getIncidentId() + " -> " + report.getGradingOutcome());
                 mistakes++;
+
+                if (report.getGradingOutcome().contains("False Positive")) {
+                    shiftStatistics.put("False Positive (Blocked Employee)", shiftStatistics.get("False Positive (Blocked Employee)") + 1);
+                } else {
+                    shiftStatistics.put("False Negative (Missed Hacker)", shiftStatistics.get("False Negative (Missed Hacker)") + 1);
+                }
+            } else {
+                shiftStatistics.put("Flawless Decisions", shiftStatistics.get("Flawless Decisions") + 1);
             }
         }
+
+        System.out.println("\n--- SHIFT STATISTICS ---");
+        for (Map.Entry<String, Integer> entry : shiftStatistics.entrySet()) {
+            System.out.println("- " + entry.getKey() + ": " + entry.getValue());
+        }
+        System.out.println("------------------------");
 
         if (mistakes == 0) {
             System.out.println("Flawless shift! Your supervisor is pleased.");
@@ -192,6 +222,8 @@ public class GameMenu {
 
             analystRepo.save(player);
         }
+
+        secureArchiveShift(reports, player.getName());
 
         System.out.println("Press ENTER to return to the locker room...");
         scanner.nextLine();
