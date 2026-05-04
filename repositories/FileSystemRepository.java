@@ -1,6 +1,8 @@
 package repositories;
 
 import models.MonitoredSystem;
+import models.Severity;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -19,11 +21,14 @@ public class FileSystemRepository implements SystemRepository {
             for (String line : lines) {
                 String[] parts = line.split(",");
                 if (parts.length == 5) {
-                    systems.add(new MonitoredSystem(Integer.parseInt(parts[0].trim()), parts[1].trim(), parts[2].trim(), parts[3].trim(), parts[4].trim()));
+                    Severity severity = Severity.valueOf(parts[4].trim().toUpperCase());
+                    systems.add(new MonitoredSystem(Integer.parseInt(parts[0].trim()), parts[1].trim(), parts[2].trim(), parts[3].trim(), severity));
                 }
             }
         } catch (IOException e) {
             System.out.println("[WARNING] Couldn't load monitored systems.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("[ERROR] Fisierul contine un nivel de severitate invalid.");
         }
         return systems;
     }
@@ -31,7 +36,7 @@ public class FileSystemRepository implements SystemRepository {
     @Override
     public void add(MonitoredSystem system) {
         try {
-            String line = String.format("%d,%s,%s,%s,%s\n", system.getId(), system.getName(), system.getIpAddress(), system.getOsType(), system.getImportance());
+            String line = String.format("%d,%s,%s,%s,%s\n", system.getId(), system.getName(), system.getIpAddress(), system.getOsType(), system.getImportance().name());
             Files.write(Paths.get(filePath), line.getBytes(), StandardOpenOption.APPEND);
         } catch (IOException e) {
             System.out.println("[ERROR] Couldn't save monitored systems.");

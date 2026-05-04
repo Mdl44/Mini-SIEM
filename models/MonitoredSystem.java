@@ -5,9 +5,9 @@ public class MonitoredSystem {
     private final String name;
     private final String ipAddress;
     private final String osType;
-    private final String importance; // LOW, MEDIUM, HIGH,  CRITICAL
+    private final Severity importance;
 
-    public MonitoredSystem(int id, String name, String ipAddress, String osType, String importance) {
+    public MonitoredSystem(int id, String name, String ipAddress, String osType, Severity importance) {
         this.id = id;
         this.name = name;
         this.ipAddress = ipAddress;
@@ -28,7 +28,8 @@ public class MonitoredSystem {
         return ipAddress;
     }
     public String getOsType() {return osType;}
-    public String getImportance() {
+
+    public Severity getImportance() {
         return importance;
     }
 

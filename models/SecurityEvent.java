@@ -30,4 +30,12 @@ public abstract class SecurityEvent {
     public String toString() {
         return "[" + getEventType() + "]" + " Time: " + timestamp.toString() + " | System: " + sourceSystem.getName() + " | Severity: " + severity;
     }
+
+    public MonitoredSystem getSourceSystem() {
+        return sourceSystem;
+    }
+
+    public Severity getSeverity() {
+        return severity;
+    }
 }

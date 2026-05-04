@@ -1,12 +1,10 @@
 package views;
 
 import models.*;
+import repositories.*;
+import services.AuditService;
 import services.SIEMService;
 import services.TrafficSimulator;
-import repositories.AnalystRepository;
-import repositories.SystemRepository;
-import repositories.BlacklistRepository;
-import repositories.TrafficDataRepository;
 
 import java.util.*;
 import java.io.FileOutputStream;
@@ -18,8 +16,10 @@ public class GameMenu {
     private final SIEMService siemService;
     private final TrafficSimulator trafficSimulator;
     private final AnalystRepository analystRepo;
+    private final IncidentRepository incidentRepo;
 
-    public GameMenu(AnalystRepository analystRepo, SystemRepository systemRepo, BlacklistRepository blacklistRepo, TrafficDataRepository trafficRepo) {
+    public GameMenu(AnalystRepository analystRepo, SystemRepository systemRepo, BlacklistRepository blacklistRepo, TrafficDataRepository trafficRepo, IncidentRepository incidentRepo) {
+        this.incidentRepo = incidentRepo;
         this.scanner = new Scanner(System.in);
         this.analystRepo = analystRepo;
         this.siemService = new SIEMService(systemRepo, blacklistRepo);
@@ -66,8 +66,9 @@ public class GameMenu {
                         if (loggedIn.getCurrentLives() <= 0) {
                             System.out.println("\n[ACCESS DENIED] Account terminated due to poor performance.");
                         } else {
+                            AuditService.getInstance().logAction("LOGIN_ANALYST_" + loggedIn.getName());
                             analystLoop(loggedIn);
-                            analystRepo.save(loggedIn); // salvez progresul
+                            analystRepo.update(loggedIn); // salvez progresul
                         }
                     } else {
                         System.out.println("\n[ERROR] Invalid credentials.");
@@ -75,6 +76,7 @@ public class GameMenu {
                     break;
                 case "2":
                     Admin admin = new Admin(1, "SuperAdmin", "root@soc.local");
+                    AuditService.getInstance().logAction("ADMIN_LOGIN_SUCCESS");
                     adminLoop(admin);
                     break;
                 case "3":
@@ -135,6 +137,8 @@ public class GameMenu {
 
                         System.out.println("[SENIOR ANALYST] Let me look... This is " + (isThreat ? "a clear threat." : "a false alarm."));
                         System.out.println("[STAMP] Senior has " + seniorDecision + " the traffic for you.");
+                        AuditService.getInstance().logAction("SENIOR_ANALYST_CALLED");
+                        incidentRepo.save(currentCase);
 
                         return new InvestigationReport(reportId, currentCase.getId(), player.getId(), seniorDecision, isThreat);
                     } else {
@@ -152,9 +156,13 @@ public class GameMenu {
                     break;
                 case "allow":
                     System.out.println("[STAMP] Traffic Allowed. Next!");
+                    AuditService.getInstance().logAction("ALLOW_TRAFFIC");
+                    incidentRepo.save(currentCase);
                     return new InvestigationReport(reportId, currentCase.getId(), player.getId(), "ALLOWED", currentCase.isMalicious());
                 case "block":
                     System.out.println("[STAMP] Traffic Blocked. Next!");
+                    AuditService.getInstance().logAction("BLOCK_TRAFFIC");
+                    incidentRepo.save(currentCase);
                     return new InvestigationReport(reportId, currentCase.getId(), player.getId(), "BLOCKED", currentCase.isMalicious());
                 default:
                     System.out.println("[ERROR] Invalid desk command.");
@@ -220,7 +228,7 @@ public class GameMenu {
             System.out.println("   You are a true Veteran. Weeks completed: " + weeksCompleted + "   ");
             System.out.println("==================================================");
 
-            analystRepo.save(player);
+            analystRepo.update(player);
         }
 
         secureArchiveShift(reports, player.getName());
@@ -289,15 +297,7 @@ public class GameMenu {
                         System.out.println("[ERROR] Invalid priority level. Try again.");
                     }
 
-                    List<MonitoredSystem> currentSystems = siemService.getMonitoredSystems();
-                    int newSysId = 1;
-                    for (MonitoredSystem sys : currentSystems) {
-                        if (sys.getId() >= newSysId) {
-                            newSysId = sys.getId() + 1;
-                        }
-                    }
-
-                    MonitoredSystem newSys = new MonitoredSystem(newSysId, name, ip, os, importance);
+                    MonitoredSystem newSys = new MonitoredSystem(0, name, ip, os, Severity.valueOf(importance));
                     siemService.addMonitoredSystem(newSys);
                     System.out.println("[SUCCESS] System added.");
                     break;
@@ -316,15 +316,10 @@ public class GameMenu {
 
                     System.out.print("New Password: ");
                     String newPass = scanner.nextLine().trim();
-                    List<SOCAnalyst> currentRoster = analystRepo.findAll();
-                    int newAnalystId = 1;
-                    for (SOCAnalyst analyst : currentRoster) {
-                        if (analyst.getId() >= newAnalystId) {
-                            newAnalystId = analyst.getId() + 1;
-                        }
-                    }
-                    SOCAnalyst newUser = new SOCAnalyst(newAnalystId, newName, newName + "@soc.local", newPass);
+
+                    SOCAnalyst newUser = new SOCAnalyst(0, newName, newName + "@soc.local", newPass);
                     analystRepo.save(newUser);
+                    AuditService.getInstance().logAction("ADMIN_CREATED_ANALYST_" + newName);
                     System.out.println("[SUCCESS] New analyst profile created. They can now login from the main menu.");
                     break;
                 }
@@ -348,6 +343,15 @@ public class GameMenu {
                 }
                 case "5":
                     break label;
+                case "6":
+                    System.out.print("Enter Analyst ID to terminate: ");
+                    try {
+                        int idToDelete = Integer.parseInt(scanner.nextLine().trim());
+                        analystRepo.delete(idToDelete);
+                    } catch (NumberFormatException e) {
+                        System.out.println("[ERROR] Invalid ID format. Please enter a numeric value.");
+                    }
+                    break;
                 default:
                     System.out.println("[ERROR] Invalid command.");
                     break;

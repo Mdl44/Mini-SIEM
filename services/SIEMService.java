@@ -20,13 +20,15 @@ public class SIEMService {
     public void loadDailyQueue(List<Incident> generatedSessions) {
         activeIncidents.clear();
         activeIncidents.addAll(generatedSessions);
-        System.out.println("[SYSTEM] Desk populated with " + activeIncidents.size() + " dossiers for review.");
+        AuditService.getInstance().logAction("SHIFT_STARTED_WITH_" + generatedSessions.size() + "_CASES");
+        System.out.println("[SYSTEM] Desk populated...");
     }
 
     public Incident claimNextIncident() {
         if (activeIncidents.isEmpty()) {
             return null;
         }
+        AuditService.getInstance().logAction("CLAIM_INCIDENT");
         return activeIncidents.pollFirst();
     }
 
@@ -54,6 +56,7 @@ public class SIEMService {
         boolean added = blacklistRepository.add(ip);
         if (added) {
             System.out.println("[SUCCESS] IP " + ip + " permanently added to the official blacklist.");
+            AuditService.getInstance().logAction("BLACKLIST_ADD");
         } else {
             System.out.println("[INFO] IP is already on the blacklist.");
         }
@@ -62,6 +65,7 @@ public class SIEMService {
 
     public void addMonitoredSystem(MonitoredSystem system) {
         systemRepository.add(system);
+        AuditService.getInstance().logAction("SYSTEM_ADD");
     }
 
     public List<MonitoredSystem> getMonitoredSystems() {

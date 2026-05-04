@@ -23,4 +23,8 @@ public class NetworkEvent extends SecurityEvent {
     public String toString() {
         return super.toString() + " | Source IP: " + attackerIP + " | Target Port: " + port + " | Protocol: " + protocol;
     }
+
+    public String getAttackerIP() { return attackerIP; }
+    public int getPort() { return port; }
+    public String getProtocol() { return protocol; }
 }

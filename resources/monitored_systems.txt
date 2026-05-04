@@ -4,3 +4,5 @@
 4, HR_Shared_Drive, 10.0.0.20, Windows, MEDIUM
 5, Guest_Wi-Fi_Router, 192.168.1.1, Linux, LOW
 6,Router,10.0.0.1,Cisco IOS,CRITICAL
+7,Server,10.0.0.2,Linux,CRITICAL
+8,Server,10.0.0.3,Windows,LOW

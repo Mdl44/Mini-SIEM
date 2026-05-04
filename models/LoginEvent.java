@@ -22,4 +22,8 @@ public class LoginEvent extends SecurityEvent {
     public String toString() {
         return super.toString() + " | User: " + username + " | Status: " + status + " | IP: " + sourceIP;
     }
+
+    public String getUsername() { return username; }
+    public String getStatus() { return status; }
+    public String getSourceIP() { return sourceIP; }
 }
