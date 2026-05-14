@@ -9,7 +9,8 @@ CREATE TABLE users (
     max_hp INT DEFAULT 3,
     current_hp INT DEFAULT 3,
     max_senior_calls INT DEFAULT 2,
-    current_senior_calls INT DEFAULT 2
+    current_senior_calls INT DEFAULT 2,
+    soc_credits INT DEFAULT 0
 );
 
 CREATE TABLE blacklisted_ips (
@@ -61,14 +62,14 @@ CREATE TABLE security_events (
     CONSTRAINT fk_event_system FOREIGN KEY (system_id) REFERENCES monitored_systems(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS achievements (
+CREATE TABLE achievements (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) UNIQUE NOT NULL,
     description TEXT,
     bonus_credits INT DEFAULT 0
 );
 
-CREATE TABLE IF NOT EXISTS user_achievements (
+CREATE TABLE  user_achievements (
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
     achievement_id INT REFERENCES achievements(id) ON DELETE CASCADE,
     unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

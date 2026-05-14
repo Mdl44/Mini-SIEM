@@ -74,7 +74,7 @@ public class DatabaseIncidentRepository implements IncidentRepository {
             }
 
             connection.commit();
-            System.out.println("[DB] Dossier saved successfully with real DB ID: #" + realIncidentId + " (" + incident.getEvents().size() + " events attached)");
+            System.out.println("[DB] Dossier saved successfully with  ID: #" + realIncidentId + " (" + incident.getEvents().size() + " events attached)");
 
         } catch (SQLException e) {
             try { connection.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
