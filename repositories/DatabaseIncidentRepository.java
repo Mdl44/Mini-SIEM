@@ -7,12 +7,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class DatabaseIncidentRepository implements IncidentRepository {
+public class DatabaseIncidentRepository extends AbstractDatabaseRepository<Incident, Integer> implements IncidentRepository {
 
-    private Connection connection;
+    private static DatabaseIncidentRepository instance;
 
-    public DatabaseIncidentRepository() {
-        this.connection = DatabaseConnectionManager.getInstance().getConnection();
+    private DatabaseIncidentRepository() {
+        super();
+    }
+
+    public static DatabaseIncidentRepository getInstance() {
+        if (instance == null) {
+            instance = new DatabaseIncidentRepository();
+        }
+        return instance;
     }
 
     @Override
@@ -85,7 +92,7 @@ public class DatabaseIncidentRepository implements IncidentRepository {
     }
 
     @Override
-    public Optional<Incident> findById(int id) {
+    public Optional<Incident> findById(Integer id) {
         String sql = "SELECT * FROM incidents WHERE id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, id);
@@ -134,7 +141,7 @@ public class DatabaseIncidentRepository implements IncidentRepository {
     }
 
     @Override
-    public void delete(int id) {
+    public void delete(Integer id) {
         String sql = "DELETE FROM incidents WHERE id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, id);

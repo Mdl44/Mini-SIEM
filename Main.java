@@ -9,7 +9,7 @@ public class Main {
         AnalystRepository analystRepo = new DatabaseAnalystRepository();
         SystemRepository systemRepo = new DatabaseSystemRepository();
         BlacklistRepository blacklistRepo = new DatabaseBlacklistRepository();
-        IncidentRepository incidentRepo = new DatabaseIncidentRepository();
+        IncidentRepository incidentRepo = DatabaseIncidentRepository.getInstance();
         TrafficDataRepository trafficRepo = new FileTrafficDataRepository();
 
         GameMenu menu = new GameMenu(analystRepo, systemRepo, blacklistRepo, trafficRepo, incidentRepo);
