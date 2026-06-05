@@ -1,13 +1,15 @@
 package repositories;
 
-import java.util.List;
+import java.util.Optional;
 
-public interface BlacklistRepository {
-    List<String> getAll();
-    boolean add(String ip);
+public interface BlacklistRepository extends CrudRepository<String, String> {
 
-    default boolean remove(String ip) {
-        System.out.println("Remove operation is not supported in legacy file-based repository.");
-        return false;
+    @Override
+    default void update(String ip) {
+        System.out.println("Update operation is not supported for simple blacklist strings.");
+    }
+
+    default void delete(String ip) {
+        System.out.println("Delete operation is not supported in legacy file-based repository.");
     }
 }

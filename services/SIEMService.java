@@ -10,7 +10,7 @@ import java.util.*;
 public class SIEMService {
     private final SystemRepository systemRepository;
     private final BlacklistRepository blacklistRepository;
-    private final TreeSet<Incident> activeIncidents = new TreeSet<>(); //sorteaza incidentele dupa severitate, pentru a trata mai intai cele mai severe cazuri
+    private final TreeSet<Incident> activeIncidents = new TreeSet<>();
 
     public SIEMService(SystemRepository systemRepository, BlacklistRepository blacklistRepository) {
         this.systemRepository = systemRepository;
@@ -38,7 +38,7 @@ public class SIEMService {
 
     public void printBlacklist() {
         System.out.println("\n--- OFFICIAL BLACKLIST ---");
-        for (String ip : blacklistRepository.getAll()) {
+        for (String ip : blacklistRepository.findAll()) {
             System.out.println("- " + ip);
         }
         System.out.println("--------------------------\n");
@@ -53,18 +53,17 @@ public class SIEMService {
     }
 
     public void addBlacklistIp(String ip) {
-        boolean added = blacklistRepository.add(ip);
-        if (added) {
+        if (blacklistRepository.findById(ip).isPresent()) {
+            System.out.println("[INFO] IP is already on the blacklist.");
+        } else {
+            blacklistRepository.save(ip);
             System.out.println("[SUCCESS] IP " + ip + " permanently added to the official blacklist.");
             AuditService.getInstance().logAction("BLACKLIST_ADD");
-        } else {
-            System.out.println("[INFO] IP is already on the blacklist.");
         }
     }
 
-
     public void addMonitoredSystem(MonitoredSystem system) {
-        systemRepository.add(system);
+        systemRepository.save(system);
         AuditService.getInstance().logAction("SYSTEM_ADD");
     }
 

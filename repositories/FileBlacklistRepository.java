@@ -7,6 +7,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class FileBlacklistRepository implements BlacklistRepository {
@@ -27,20 +28,26 @@ public class FileBlacklistRepository implements BlacklistRepository {
     }
 
     @Override
-    public List<String> getAll() {
+    public List<String> findAll() {
         return new ArrayList<>(blacklistedIPs);
     }
 
     @Override
-    public boolean add(String ip) {
+    public void save(String ip) {
         if (blacklistedIPs.add(ip)) {
             try {
                 Files.write(Paths.get(filePath), ("\n" + ip).getBytes(), StandardOpenOption.APPEND);
-                return true;
             } catch (IOException e) {
-                System.out.println("[ERROR] Couldn't add IP: .");
+                System.out.println("[ERROR] Couldn't add IP.");
             }
         }
-        return false;
+    }
+
+    @Override
+    public Optional<String> findById(String ip) {
+        if (blacklistedIPs.contains(ip)) {
+            return Optional.of(ip);
+        }
+        return Optional.empty();
     }
 }

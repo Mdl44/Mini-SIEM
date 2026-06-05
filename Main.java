@@ -6,9 +6,9 @@ public class Main {
         System.out.println("[SYSTEM] Initializing SIEM Simulator Services...");
         System.out.println("[SYSTEM] Connecting to PostgreSQL Database...");
 
-        AnalystRepository analystRepo = new DatabaseAnalystRepository();
-        SystemRepository systemRepo = new DatabaseSystemRepository();
-        BlacklistRepository blacklistRepo = new DatabaseBlacklistRepository();
+        AnalystRepository analystRepo = DatabaseAnalystRepository.getInstance();
+        SystemRepository systemRepo = DatabaseSystemRepository.getInstance();
+        BlacklistRepository blacklistRepo = DatabaseBlacklistRepository.getInstance();
         IncidentRepository incidentRepo = DatabaseIncidentRepository.getInstance();
         TrafficDataRepository trafficRepo = new FileTrafficDataRepository();
 
