@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 public abstract class SecurityEvent {
     private int id;
     private final LocalDateTime timestamp;
-    private final MonitoredSystem sourceSystem; // echipamentul care l a generat
+    private final MonitoredSystem sourceSystem;
     private final Severity severity; // LOW, MEDIUM, HIGH, CRITICAL
 
     public SecurityEvent(int id, LocalDateTime timestamp, MonitoredSystem sourceSystem, Severity severity) {
